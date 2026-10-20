@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Proof of concept link</title>
+<style>
+:root{color-scheme:light dark;--fg:#1b1f24;--muted:#57606a;--bg:#fff;--line:#d0d7de;--accent:#e8501e}
+@media (prefers-color-scheme:dark){:root{--fg:#e6edf3;--muted:#9198a1;--bg:#0d1117;--line:#30363d}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;display:flex;min-height:100vh;align-items:center;justify-content:center;padding:16px}
+main{max-width:40rem;width:100%}
+h1{font-size:1.15rem;margin:0 0 .5rem}
+p{color:var(--muted);margin:.5rem 0}
+a.go{display:inline-block;margin:1.2rem 0 .4rem;padding:.7rem 1.4rem;background:var(--accent);color:#fff;text-decoration:none;border-radius:6px;font-weight:600}
+a.go:focus-visible{outline:3px solid var(--fg);outline-offset:2px}
+pre{border:1px solid var(--line);border-radius:6px;padding:.7rem .8rem;overflow-x:auto;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.85rem;white-space:pre-wrap;word-break:break-all;margin:.3rem 0 0}
+.err{color:var(--accent);font-weight:600}
+</style>
+</head>
+<body>
+<main>
+<h1 id="h">Proof of concept link</h1>
+<p id="lead"></p>
+<p id="dest"><strong>Destination</strong></p>
+<pre id="url"></pre>
+<p><a class="go" id="go" href="#">Open the link</a></p>
+<p>This page performs no redirect on its own: nothing happens until the link above is clicked, and the full destination is printed so it can be read first.</p>
+</main>
+<script>
+(function () {
+  var q = new URLSearchParams(location.search);
+  var u = q.get("u") || "";
+  var label = q.get("label");
+  var lead = q.get("lead");
+  var go = document.getElementById("go");
+  var out = document.getElementById("url");
+  var ok = /^https?:\/\//i.test(u);
+  document.getElementById("lead").textContent = lead ||
+    "Clicking the link below reproduces the issue described in the report. It is an ordinary link: one click, same tab, no script on this page touches the destination.";
+  if (!ok) {
+    out.className = "err";
+    out.textContent = u
+      ? "Refused: only http:// and https:// destinations are served from this page."
+      : "No destination given. Append ?u=<https URL> to this page's address.";
+    go.remove();
+    document.getElementById("dest").remove();
+    return;
+  }
+  out.textContent = u;
+  go.setAttribute("href", u);
+  go.setAttribute("rel", "noreferrer");
+  if (label) go.textContent = label;
+})();
+</script>
+</body>
+</html>
