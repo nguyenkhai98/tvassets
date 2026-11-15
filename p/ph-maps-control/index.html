@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<title>PlanetHoster Maps key - referrer restriction check</title>
+<style>
+ body{font:15px/1.5 system-ui,sans-serif;margin:0;padding:18px;background:#fff;color:#111}
+ .row{margin:6px 0}
+ code{background:#f2f2f2;padding:2px 5px;border-radius:3px}
+ #verdict{font-weight:700;font-size:18px;padding:10px;border-radius:5px;margin:12px 0}
+ .ok{background:#ffe3e3;color:#8a0000;border:2px solid #c00}
+ .blocked{background:#e3ffe8;color:#065c1b;border:2px solid #0a0}
+ .pending{background:#f4f4f4;color:#444;border:2px solid #999}
+ #map{width:620px;height:380px;border:2px solid #333;margin-top:10px;max-width:100%}
+</style></head><body>
+<h2>CONTROL: same page, last character of the key changed</h2>
+<div class="row">Key under test: <code>AIzaSyCNJRCCr6PecaUPLHtv6b1cbMxcLY6ZXI9</code></div>
+<div class="row">Key is published inline in the HTML of <code>https://my.planethoster.com/v2/</code></div>
+<div class="row">This page's origin: <code id="org"></code></div>
+<div id="verdict" class="pending">Loading the Maps JavaScript API...</div>
+<div id="map"></div>
+<script>
+ document.getElementById("org").textContent=location.origin;
+ var done=false;
+ function verdict(cls,txt){ if(done) return; done=true;
+   var v=document.getElementById("verdict"); v.className=cls; v.textContent=txt; }
+ window.gm_authFailure=function(){
+   verdict("blocked","BLOCKED: Google returned an auth failure for this origin. The key IS restricted."); };
+ function init(){
+   var m=new google.maps.Map(document.getElementById("map"),{center:{lat:48.8566,lng:2.3522},zoom:11,disableDefaultUI:false});
+   google.maps.event.addListenerOnce(m,"tilesloaded",function(){
+     verdict("ok","UNRESTRICTED: a billable Dynamic Map rendered using PlanetHoster's key from "+location.origin); });
+   setTimeout(function(){
+     var img=document.querySelector("#map img");
+     if(img&&img.naturalWidth>0) verdict("ok","UNRESTRICTED: map imagery rendered using PlanetHoster's key from "+location.origin);
+     else verdict("pending","No verdict yet. Check the browser console.");
+   },8000);
+ }
+</script>
+<script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCNJRCCr6PecaUPLHtv6b1cbMxcLY6ZXI9&callback=init"></script>
+</body></html>
